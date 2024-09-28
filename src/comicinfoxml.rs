@@ -37,7 +37,7 @@ impl From<Hentai> for ComicInfoXml
             Translator: hentai.scanlator,
             Publisher: filter_and_combine_tags(&hentai.tags, &["group"], false),
             Genre: filter_and_combine_tags(&hentai.tags, &["category"], false),
-            Web: format!("https://nhentai.net/g/{id}/", id=hentai.id),
+            Web: format!("nhentai.net/g/{id}", id=hentai.id),
             Tags: filter_and_combine_tags(&hentai.tags, &["character", "language", "parody", "tag"], true),
         }
     }
