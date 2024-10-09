@@ -4,8 +4,6 @@
 > If you have any questions, please **consult the readme first**.
 >
 > I spend a lot of effort to keep the readme up-to-date and chances are high that your problem has already been addressed here. If you still require assistance after reading the readme, post it publicly, preferably as a GitHub issue, so others can benefit from the troubleshooting as well.
->
-> **Private or insultingly lazy requests for help will not be answered any more.**
 
 ## Introduction
 
@@ -54,7 +52,7 @@ Further settings:
 
 - `DATABASE_URL`
 
-    This is the path to the SQLite database file. If you changed `DATABASE_URL`, confirm the database directory already exists. It is possible that it is not created automatically because the URL could point to a remote directory. The database file will and should be created automatically.
+    This is the URL to the SQLite database file. If you changed `DATABASE_URL`, confirm the database directory already exists. It is possible that it is not created automatically because the URL could point to a remote directory. The database file will and should be created automatically.
 
 - `DONTDOWNLOADME_FILEPATH`, optional, defaults to `None`
 
