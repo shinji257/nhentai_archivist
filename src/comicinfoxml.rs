@@ -17,6 +17,7 @@ pub struct ComicInfoXml
     pub Genre: Option<String>, // tag type: category
     pub Tags: Option<String>, // tag types: character, language, parody, tag; language does not get own field "LanguageISO" because it only interprets 1 language as code properly, exhaustive language code list and only keeping 1 language if multiple present is janky
     pub Web: String, // nhentai gallery
+    pub Number: u32, // nhentai gallery number
 
 }
 // ComicInfo.xml schema: https://anansi-project.github.io/docs/comicinfo/documentation
@@ -29,11 +30,11 @@ impl From<Hentai> for ComicInfoXml
     {
         return Self
         {
-            Title: format!("{} {}", hentai.id, hentai.title_pretty.unwrap_or_default()), // id and actual title, because can't search for field "Number" in komga
+            Title: format!("{}", hentai.title_pretty.unwrap_or_default()), // id and actual title, because can't search for field "Number" in komga
             Year: hentai.upload_date.format("%Y").to_string().parse::<i16>().unwrap_or_else(|_| panic!("Converting year \"{}\" to i16 failed even though it comes directly from chrono::DateTime.", hentai.upload_date.format("%Y"))),
             Month: hentai.upload_date.format("%m").to_string().parse::<u8>().unwrap_or_else(|_| panic!("Converting month \"{}\" to u8 failed even though it comes directly from chrono::DateTime.", hentai.upload_date.format("%m"))),
             Day: hentai.upload_date.format("%d").to_string().parse::<u8>().unwrap_or_else(|_| panic!("Converting day \"{}\" to u8 failed even though it comes directly from chrono::DateTime.", hentai.upload_date.format("%d"))),
-            Writer: filter_and_combine_tags(&hentai.tags, &["artist"], false),
+            Writer: filter_and_combine_tags(&hentai.tags, &["artist"], false, None),
             Translator: hentai.scanlator,
             Publisher: filter_and_combine_tags(&hentai.tags, &["group"], false),
             Genre: filter_and_combine_tags(&hentai.tags, &["category"], false),
@@ -51,10 +52,11 @@ impl From<Hentai> for ComicInfoXml
 /// - `tags`: tag list to combine
 /// - `types`: tag types to keep
 /// - `display_type`: whether to display the tag type in the output in form of "type: name"
+/// - `id`: nhentai gallery id, use None when not supplying one
 ///
 /// # Returns
 /// - filtered and combined tags or None
-fn filter_and_combine_tags(tags: &[Tag], types: &[&str], display_type: bool) -> Option<String>
+fn filter_and_combine_tags(tags: &[Tag], types: &[&str], display_type: bool, id: Option<&u32>) -> Option<String>
 {
     let mut tags_filtered: Vec<String> = tags.iter()
         .filter(|tag| types.contains(&tag.r#type.as_str())) // only keep tags with type in types
@@ -67,6 +69,7 @@ fn filter_and_combine_tags(tags: &[Tag], types: &[&str], display_type: bool) -> 
             }
         ) // change either to "{name}" or "{type}: {name}", because ComicInfo.xml + Komga don't have proper fields for all tag types
         .collect();
+    if id.is_some() {tags_filtered.push(format!("nhentai: {}", id.unwrap()));}
     tags_filtered.sort(); // sort alphabetically
     let tags_filtered_combined: Option<String> = Some(tags_filtered.join(",")) // join at ","
         .and_then(|s| if s.is_empty() {None} else {Some(s)}); // convert Some("") to None, otherwise forward unchanged
