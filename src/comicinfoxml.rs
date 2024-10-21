@@ -34,12 +34,12 @@ impl From<Hentai> for ComicInfoXml
             Year: hentai.upload_date.format("%Y").to_string().parse::<i16>().unwrap_or_else(|_| panic!("Converting year \"{}\" to i16 failed even though it comes directly from chrono::DateTime.", hentai.upload_date.format("%Y"))),
             Month: hentai.upload_date.format("%m").to_string().parse::<u8>().unwrap_or_else(|_| panic!("Converting month \"{}\" to u8 failed even though it comes directly from chrono::DateTime.", hentai.upload_date.format("%m"))),
             Day: hentai.upload_date.format("%d").to_string().parse::<u8>().unwrap_or_else(|_| panic!("Converting day \"{}\" to u8 failed even though it comes directly from chrono::DateTime.", hentai.upload_date.format("%d"))),
-            Writer: filter_and_combine_tags(&hentai.tags, &["artist"], false, None),
+            Writer: filter_and_combine_tags(&hentai.tags, &["artist"], false),
             Translator: hentai.scanlator,
-            Publisher: filter_and_combine_tags(&hentai.tags, &["group"], false, None),
-            Genre: filter_and_combine_tags(&hentai.tags, &["category"], false, None),
+            Publisher: filter_and_combine_tags(&hentai.tags, &["group"], false),
+            Genre: filter_and_combine_tags(&hentai.tags, &["category"], false),
             Web: format!("https://nhentai.net/g/{id}/", id=hentai.id),
-            Tags: filter_and_combine_tags(&hentai.tags, &["character", "language", "parody", "tag"], true, Some(&hentai.id)),
+            Tags: filter_and_combine_tags(&hentai.tags, &["character", "language", "parody", "tag"], true),
             Number: hentai.id,
         }
     }
@@ -57,7 +57,7 @@ impl From<Hentai> for ComicInfoXml
 ///
 /// # Returns
 /// - filtered and combined tags or None
-fn filter_and_combine_tags(tags: &[Tag], types: &[&str], display_type: bool, id: Option<&u32>) -> Option<String>
+fn filter_and_combine_tags(tags: &[Tag], types: &[&str], display_type: bool) -> Option<String>
 {
     let mut tags_filtered: Vec<String> = tags.iter()
         .filter(|tag| types.contains(&tag.r#type.as_str())) // only keep tags with type in types
@@ -70,7 +70,6 @@ fn filter_and_combine_tags(tags: &[Tag], types: &[&str], display_type: bool, id:
             }
         ) // change either to "{name}" or "{type}: {name}", because ComicInfo.xml + Komga don't have proper fields for all tag types
         .collect();
-    if id.is_some() {tags_filtered.push(format!("nhentai: {}", id.unwrap()));}
     tags_filtered.sort(); // sort alphabetically
     let tags_filtered_combined: Option<String> = Some(tags_filtered.join(",")) // join at ","
         .and_then(|s| if s.is_empty() {None} else {Some(s)}); // convert Some("") to None, otherwise forward unchanged
