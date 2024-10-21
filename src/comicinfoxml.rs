@@ -18,6 +18,7 @@ pub struct ComicInfoXml
     pub Tags: Option<String>, // tag types: character, language, parody, tag; language does not get own field "LanguageISO" because it only interprets 1 language as code properly, exhaustive language code list and only keeping 1 language if multiple present is janky
     pub Web: String, // nhentai gallery
     pub Number: u32, // nhentai gallery number
+    pub Timestamp: u32, // Month/Day/Year in raw epoch for LANraragi
 
 }
 // ComicInfo.xml schema: https://anansi-project.github.io/docs/comicinfo/documentation
@@ -41,6 +42,7 @@ impl From<Hentai> for ComicInfoXml
             Web: format!("https://nhentai.net/g/{id}/", id=hentai.id),
             Tags: filter_and_combine_tags(&hentai.tags, &["character", "language", "parody", "tag"], true),
             Number: hentai.id,
+            Timestamp: hentai.upload_date.format("%s").to_string().parse::<u32>().unwrap_or_else(|_| panic!("Converting date \"{}\" to u32 failed even though it comes directly from chrono::DateTime.", hentai.upload_date.format("%s"))),
         }
     }
 }
